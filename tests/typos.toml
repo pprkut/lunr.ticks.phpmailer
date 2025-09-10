@@ -1,5 +1,8 @@
 # SPDX-FileCopyrightText: Copyright 2025 Framna Netherland B.V., Zwolle, The Netherlands
 # SPDX-License-Identifier: CC0-1.0
 
+[default.extend-identifiers]
+SGksCllvdXIgTXlUQUcgb25lLXRpbWUgdmVyaWZpY2F0aW9uIGNvZGUgaXMKCjcwOTMzNiAKClBs = "SGksCllvdXIgTXlUQUcgb25lLXRpbWUgdmVyaWZpY2F0aW9uIGNvZGUgaXMKCjcwOTMzNiAKClBs"
+
 [default.extend-words]
 Helo = "Helo"

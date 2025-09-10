@@ -251,11 +251,13 @@ class PHPMailer extends BaseMailer
                 $options += $this->SMTPOptions;
             }
 
+            // phpcs:ignore Lunr.NamingConventions.CamelCapsVariableName
+            $body    = $this->Encoding === self::ENCODING_BASE64 ? base64_decode($this->MIMEBody) : $this->MIMEBody;
             $headers = json_encode($this->getMIMEHeaderArray());
             $options = json_encode($options + $extra);
 
             $fields['requestHeaders'] = is_bool($headers) ? NULL : $headers;
-            $fields['requestBody']    = $this->prepareLogData($this->MIMEBody);
+            $fields['requestBody']    = $this->prepareLogData($body);
             $fields['options']        = is_bool($options) ? NULL : $options;
 
             unset($headers, $options);

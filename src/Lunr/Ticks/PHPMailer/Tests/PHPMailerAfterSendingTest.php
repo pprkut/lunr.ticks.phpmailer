@@ -10,6 +10,7 @@
 namespace Lunr\Ticks\PHPMailer\Tests;
 
 use Lunr\Ticks\AnalyticsDetailLevel;
+use PHPMailer\PHPMailer\PHPMailer;
 
 /**
  * This class contains tests for the PHPMailer class.
@@ -839,6 +840,107 @@ class PHPMailerAfterSendingTest extends PHPMailerTestCase
                         'url'            => 'localhost',
                         'requestHeaders' => '{"Content-Type":"text\/plain"}',
                         'requestBody'    => $string . 'E984TBDFDAKJF',
+                        'options'        => json_encode($options),
+                    ]);
+
+        $this->event->expects($this->once())
+                    ->method('recordTimestamp');
+
+        $this->event->expects($this->once())
+                    ->method('record');
+
+        $method = $this->getReflectionMethod('afterSending');
+        $method->invoke($this->class, TRUE, [ 'example@mail.com', 'John Doe' ], [], [], 'subject', 'body', 'from@mail.com', []);
+
+        $this->unmockFunction('microtime');
+    }
+
+    /**
+     * Test that the afterSending works correctly with a base 64 encoded body
+     *
+     * @covers Lunr\Ticks\PHPMailer\PHPMailer::afterSending
+     */
+    public function testAfterSendingWorksCorrectlyWithBase64Body(): void
+    {
+        $MIMEBody = 'SGksCllvdXIgTXlUQUcgb25lLXRpbWUgdmVyaWZpY2F0aW9uIGNvZGUgaXMKCjcwOTMzNiAKClBs
+                     ZWFzZSBkbyBub3Qgc2hhcmUgdGhpcyBjb2RlIHdpdGggYW55b25lLiBJZiB5b3UgZGlkIG5vdCBt
+                     YWtlIHRoaXMgcmVxdWVzdCwgcGxlYXNlIGlnbm9yZSB0aGlzIGVtYWlsLgoKSG9uZyBLb25nIElu
+                     dGVybmF0aW9uYWwgQWlycG9ydAo=';
+
+        $this->mockFunction('microtime', fn() => 1724932394.128985);
+
+        $this->setReflectionPropertyValue('startTimestamp', 1724932393.008985);
+        $this->setReflectionPropertyValue('Mailer', 'smtp');
+        $this->setReflectionPropertyValue('MIMEHeader', 'Content-Type: text/plain');
+        $this->setReflectionPropertyValue('MIMEBody', $MIMEBody);
+        $this->setReflectionPropertyValue('analyticsDetailLevel', AnalyticsDetailLevel::Full);
+        $this->setReflectionPropertyValue('SMTPOptions', [ 'SMTPExtra' => 'extra_value' ]);
+        $this->setReflectionPropertyValue('Encoding', PHPMailer::ENCODING_BASE64);
+
+        $this->controller->shouldReceive('getTraceID')
+                         ->once()
+                         ->andReturn('bc5bfcc7-8d8d-4e59-b4be-7453b97410d');
+
+        $this->controller->shouldReceive('getSpanID')
+                         ->once()
+                         ->andReturn('ef14c184-5b4a-4e0b-8026-7c5683e611c7');
+
+        $this->controller->shouldReceive('getParentSpanID')
+                         ->once()
+                         ->andReturn('6cb28307-95b0-491e-a82a-9d679f511e43');
+
+        $this->controller->shouldReceive('getSpanSpecificTags')
+                         ->once()
+                         ->andReturn([]);
+
+        $this->logger->expects($this->once())
+                     ->method('newEvent')
+                     ->with('outbound_requests_log')
+                     ->willReturn($this->event);
+
+        $this->event->expects($this->once())
+                    ->method('setTraceID')
+                    ->with('bc5bfcc7-8d8d-4e59-b4be-7453b97410d');
+
+        $this->event->expects($this->once())
+                    ->method('setSpanID')
+                    ->with('ef14c184-5b4a-4e0b-8026-7c5683e611c7');
+
+        $this->event->expects($this->once())
+                    ->method('setParentSpanID')
+                    ->with('6cb28307-95b0-491e-a82a-9d679f511e43');
+
+        $this->event->expects($this->once())
+                    ->method('addTags')
+                    ->with([
+                        'type'   => 'SMTP',
+                        'status' => '200',
+                        'domain' => 'localhost',
+                    ]);
+
+        $options = [
+            'SMTPPort'      => 25,
+            'SMTPHelo'      => '',
+            'SMTPSecure'    => '',
+            'SMTPAutoTLS'   => TRUE,
+            'SMTPAuth'      => FALSE,
+            'SMTPUsername'  => '',
+            'SMTPPassword'  => '',
+            'SMTPKeepAlive' => FALSE,
+            'SMTPAuthType'  => '',
+            'SMTPTimeout'   => 300,
+            'SMTPExtra'     => 'extra_value'
+        ];
+
+        $this->event->expects($this->once())
+                    ->method('addFields')
+                    ->with([
+                        'startTimestamp' => 1724932393.008985,
+                        'endTimestamp'   => 1724932394.128985,
+                        'executionTime'  => 1.12,
+                        'url'            => 'localhost',
+                        'requestHeaders' => '{"Content-Type":"text\/plain"}',
+                        'requestBody'    => base64_decode($MIMEBody),
                         'options'        => json_encode($options),
                     ]);
 
