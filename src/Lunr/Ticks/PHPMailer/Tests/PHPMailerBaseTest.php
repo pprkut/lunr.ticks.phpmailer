@@ -85,6 +85,18 @@ class PHPMailerBaseTest extends PHPMailerTestCase
         $this->assertPropertyUnset('startTimestamp');
     }
 
+    /**
+     * Test that action_function is cloned correctly
+     *
+     * @covers Lunr\Ticks\PHPMailer\PHPMailer::__clone
+     */
+    public function testActionFunctionIsClonedCorrectly(): void
+    {
+        $cloned = clone $this->class;
+
+        $this->assertSame($cloned, $cloned->action_function[0]); // phpcs:ignore Lunr.NamingConventions.CamelCapsVariableName
+    }
+
 }
 
 ?>

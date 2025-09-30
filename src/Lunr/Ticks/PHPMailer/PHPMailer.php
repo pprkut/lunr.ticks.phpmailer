@@ -68,10 +68,6 @@ class PHPMailer extends BaseMailer
 
         parent::__construct($exceptions);
 
-        /**
-         * The type of action_function is defined as string, but it should be callable, so we ignore the phpstan warning
-         * @phpstan-ignore assign.propertyType
-         */
         $this->action_function = [ $this, 'afterSending' ]; // phpcs:ignore Lunr.NamingConventions.CamelCapsVariableName
     }
 
@@ -84,6 +80,16 @@ class PHPMailer extends BaseMailer
         unset($this->analyticsDetailLevel);
 
         parent::__destruct();
+    }
+
+    /**
+     * Clone.
+     *
+     * @return void
+     */
+    public function __clone(): void
+    {
+        $this->action_function = [ $this, 'afterSending' ]; // phpcs:ignore Lunr.NamingConventions.CamelCapsVariableName
     }
 
     /**
