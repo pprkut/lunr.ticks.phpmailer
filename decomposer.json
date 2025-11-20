@@ -20,7 +20,7 @@
     },
     "PHPMailer": {
         "url": "https://github.com/PHPMailer/PHPMailer.git",
-        "version": "6.10.0",
+        "version": "7.0.0",
         "psr4": {
             "prefix": "PHPMailer\\PHPMailer",
             "search-path": "/src/"
